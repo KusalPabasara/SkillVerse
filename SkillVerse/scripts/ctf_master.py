@@ -1,5 +1,6 @@
 import sys
 import json
+import os
 
 def analyze_challenge(description, files):
     """
@@ -10,18 +11,30 @@ def analyze_challenge(description, files):
     # Simple keyword-based category detection
     if 'crypto' in description or 'cipher' in description or 'rsa' in description or 'aes' in description:
         return 'ctf-crypto'
-    elif 'pwn' in description or 'exploit' in description or 'buffer overflow' in description:
+    if 'pwn' in description or 'exploit' in description or 'buffer overflow' in description:
         return 'ctf-pwn'
-    elif 'web' in description or 'xss' in description or 'sqli' in description:
+    if 'web' in description or 'xss' in description or 'sqli' in description:
         return 'ctf-web'
-    elif 'forensics' in description or 'steganography' in description or 'pcap' in description:
+    if 'forensics' in description or 'steganography' in description or 'pcap' in description:
         return 'ctf-forensics'
-    elif 'reverse' in description or 'disassemble' in description or 'ghidra' in description:
+    if 'reverse' in description or 'disassemble' in description or 'ghidra' in description:
         return 'ctf-reverse'
-    elif 'osint' in description or 'recon' in description or 'geolocate' in description:
+    if 'osint' in description or 'recon' in description or 'geolocate' in description:
         return 'ctf-osint'
-    else:
-        return 'ctf-misc'
+
+    # File extension-based category detection
+    for file in files:
+        ext = os.path.splitext(file)[1]
+        if ext in ['.pcap', '.pcapng', '.dd', '.vmem', '.raw', '.img']:
+            return 'ctf-forensics'
+        if ext in ['.elf', '.exe', '.so', '.dll', '.apk']:
+            return 'ctf-pwn' # Could also be reverse, but pwn is a good starting point
+        if ext in ['.py', '.php', '.js', '.html', '.css', '.jar', '.war']:
+            return 'ctf-web'
+        if ext in ['.pem', '.der', '.key', '.crt', '.cer']:
+            return 'ctf-crypto'
+
+    return 'ctf-misc'
 
 def main():
     if len(sys.argv) < 2:
